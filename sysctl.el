@@ -59,7 +59,7 @@
         (setq path (car line))
         (insert (concat line-value "\n"))))))
 
-(defun sysctl-to-org ()
+(defun sysctl ()
   "Construct an Org buffer from the sysctl tree."
   (interactive)
   (switch-to-buffer sysctl-buffer-name)
