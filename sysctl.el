@@ -12,10 +12,19 @@
   "Run `sysctl' with the ARGS arguments."
   (shell-command-to-string (concat "sysctl " args)))
 
-(defun sysctl-split-line (line)
-  "Split LINE into key and value."
+(defun sysctl-separator ()
+  "System dependant syscl separator."
+  (let ((system (shell-command-to-string "uname -s")))
+    (cond ((string= system "Darwin\n") ": ")
+          ((string= system "OpenBSD\n") "=")
+          ((string= system "FreeBSD\n") ": ")
+          ((string= system "Linux\n") " = ")
+          (t ": "))))
+
+(defun sysctl-split-line (line separator)
+  "Split LINE into key and value, splitting with SEPARATOR."
   (let (key value)
-    (when (string-match "\\(.*?\\): \\(.*\\)$" line)
+    (when (string-match (concat "\\(.*?\\)" separator "\\(.*\\)$") line)
         (save-match-data
           (setq key (split-string (match-string 1 line) "\\.")))
       (setq value (match-string 2 line))
@@ -24,9 +33,10 @@
 (defun sysctl-split-lines (lines)
   "Split LINES into lines, keys, values."
   (let (output
+        (separator (sysctl-separator))
         (split-lines (split-string lines "\n")))
     (dolist (line split-lines output)
-      (if-let (split-line (sysctl-split-line line))
+      (if-let (split-line (sysctl-split-line line separator))
           (push split-line output)))))
 
 
@@ -55,7 +65,9 @@
   (switch-to-buffer sysctl-buffer-name)
   (erase-buffer)
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
-  (org-mode))
+  (org-mode)
+  (if (boundp flyspell-mode)
+      (flyspell-mode-off)))
 
 
 (provide 'sysctl)
