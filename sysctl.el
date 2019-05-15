@@ -4,6 +4,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'org)
 
 (defvar sysctl-buffer-name "*sysctl*"
   "Default name of the sysctl buffer.")
@@ -68,6 +69,19 @@
   (org-mode)
   (if (boundp flyspell-mode)
       (flyspell-mode-off)))
+
+(defun sysctl-construct-command ()
+  "Construct a sysctl command from the current position in the tree."
+  (save-excursion
+    (let ((value (string-trim (thing-at-point 'line t)))
+          path)
+      (if (org-at-heading-p)
+          (message "The point must be on a value.")
+        (outline-previous-heading)
+        (push (substring-no-properties (org-get-heading t t t t)) path)
+        (while (org-up-heading-safe)
+          (push (substring-no-properties (org-get-heading t t t t)) path))
+        (concat (string-join path ".") (sysctl-separator) value)))))
 
 
 (provide 'sysctl)
