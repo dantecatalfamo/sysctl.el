@@ -38,7 +38,8 @@
         (split-lines (split-string lines "\n")))
     (dolist (line split-lines output)
       (if-let (split-line (sysctl-split-line line separator))
-          (push split-line output)))))
+          (push split-line output)))
+    (nreverse output)))
 
 
 (defun sysctl-construct-tree (lines-list)
