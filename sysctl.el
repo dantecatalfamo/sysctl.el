@@ -9,13 +9,18 @@
 (defvar sysctl-buffer-name "*sysctl*"
   "Default name of the sysctl buffer.")
 
+(defun sysctl--run-command (args)
+  "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
+  (let ((shell-file-name "/bin/sh"))
+    (shell-command-to-string args)))
+
 (defun sysctl-run (args)
   "Run `sysctl' with the ARGS arguments, run with root if AS-ROOT is non-nil."
-  (shell-command-to-string (concat "sysctl " args)))
+  (sysctl--run-command (concat "sysctl " args)))
 
 (defun sysctl-separator ()
   "System dependant syscl separator."
-  (let ((system (shell-command-to-string "uname -s")))
+  (let ((system (sysctl--run-command "uname -s")))
     (cond ((string= system "Darwin\n") ": ")
           ((string= system "OpenBSD\n") "=")
           ((string= system "FreeBSD\n") ": ")
@@ -88,7 +93,7 @@
 
 (defun sysctl-superuser-cmd ()
   "Return the system's super user command."
-  (let ((system (shell-command-to-string "uname -s")))
+  (let ((system (sysctl--run-command "uname -s")))
     (cond
      ((string= system "OpenBSD\n") "doas")
      (t "sudo"))))
@@ -99,11 +104,13 @@
         ssh-host)
     (if (not (string-prefix-p "/ssh" dir))
         (concat "/" (sysctl-superuser-cmd) "::")
-      (save-match-data
-        (when (string-match ".*:\\(.+\\):" dir)
-          (setq ssh-host (match-string 1 dir))
-          (string-match "\\(.*\\):[^:]+$" dir)
-          (concat (match-string 1 dir) "|" (sysctl-superuser-cmd) ":" ssh-host ":"))))))
+      (if (string= (sysctl--run-command "whoami") "root\n")
+          dir
+        (save-match-data
+          (when (string-match ".*:\\(.+\\):" dir)
+            (setq ssh-host (match-string 1 dir))
+            (string-match "\\(.*\\):[^:]+$" dir)
+            (concat (match-string 1 dir) "|" (sysctl-superuser-cmd) ":" ssh-host ":")))))))
 
 (defun sysctl-set-value ()
   "Set the value of the current leaf on the tree in sysctl."
