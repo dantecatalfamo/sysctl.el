@@ -67,17 +67,6 @@
         (setq path (car line))
         (insert (concat line-value "\n"))))))
 
-;;;###autoload
-(defun sysctl ()
-  "Construct an Org buffer from the sysctl tree."
-  (interactive)
-  (switch-to-buffer sysctl-buffer-name)
-  (erase-buffer)
-  (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
-  (sysctl-mode)
-  (if (boundp flyspell-mode)
-      (flyspell-mode-off)))
-
 (defun sysctl-construct-path ()
   "Construct path from the current load node on the sysctl tree."
     (save-excursion
@@ -137,6 +126,17 @@
 
 (define-derived-mode sysctl-mode org-mode "Sysctl"
   "Mode for managing sysctl configs.")
+
+;;;###autoload
+(defun sysctl ()
+  "Construct an Org buffer from the sysctl tree."
+  (interactive)
+  (switch-to-buffer sysctl-buffer-name)
+  (erase-buffer)
+  (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
+  (sysctl-mode)
+  (if (boundp flyspell-mode)
+      (flyspell-mode-off)))
 
 (provide 'sysctl)
 ;;; sysctl.el ends here
