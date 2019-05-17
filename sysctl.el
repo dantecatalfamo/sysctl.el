@@ -105,7 +105,8 @@
   (if-let ((sysctl-cmd (sysctl-construct-command)))
       (if (y-or-n-p (concat "Set " sysctl-cmd "?"))
           (let ((default-directory (sysctl-construct-tramp)))
-            (message (string-trim (sysctl-run sysctl-cmd))))
+            (message (string-trim (sysctl-run sysctl-cmd)))
+            (sysctl-refresh-value))
         (message "Not set."))
     (message "The point must be on a value.")))
 
@@ -117,7 +118,8 @@
             (value (cdr (sysctl-split-line line (sysctl-separator)))))
       (progn (delete-region (line-beginning-position) (line-end-position))
              (insert value))
-    (message "The point must be on a value.")))
+    (when (called-interactively-p 'interactive)
+      (message "The point must be on a value."))))
 
 (defvar sysctl-mode-map
       (let ((map (make-sparse-keymap)))
