@@ -95,9 +95,15 @@
 
 (defun sysctl-construct-tramp ()
   "Construct the TRAMP command required to run a command as root."
-  (let ((dir default-directory))
+  (let ((dir default-directory)
+        ssh-host)
     (if (not (string-prefix-p "/ssh" dir))
-        (concat "/" (sysctl-superuser-cmd) "::"))))
+        (concat "/" (sysctl-superuser-cmd) "::")
+      (save-match-data
+        (when (string-match ".*:\\(.+\\):" dir)
+          (setq ssh-host (match-string 1 dir))
+          (string-match "\\(.*\\):[^:]+$" dir)
+          (concat (match-string 1 dir) "|" (sysctl-superuser-cmd) ":" ssh-host ":"))))))
 
 (defun sysctl-set-value ()
   "Set the value of the current leaf on the tree in sysctl."
@@ -124,6 +130,7 @@
 (defvar sysctl-mode-map
       (let ((map (make-sparse-keymap)))
         (define-key map (kbd "C-c C-c") 'sysctl-set-value)
+        (define-key map (kbd "C-c C-k") 'sysctl-refresh-value)
         map))
 
 (define-derived-mode sysctl-mode org-mode "Sysctl"
