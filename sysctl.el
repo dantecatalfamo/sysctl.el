@@ -99,7 +99,7 @@
      (t "sudo"))))
 
 (defun sysctl-construct-tramp ()
-  "Construct the TRAMP command required to run a command as root."
+  "Construct the TRAMP path required to run a command as root."
   (let ((dir default-directory)
         ssh-host)
     (if (not (string-prefix-p "/ssh" dir))
