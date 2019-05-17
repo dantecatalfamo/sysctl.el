@@ -110,7 +110,7 @@
   (if-let* ((sysctl-cmd (sysctl-construct-command)))
       (if (y-or-n-p (concat "Set " sysctl-cmd "?"))
           (let ((default-directory (sysctl-construct-tramp)))
-            (sysctl-run sysctl-cmd))
+            (message (string-trim (sysctl-run sysctl-cmd))))
         (message "Not set."))))
 
 (defvar sysctl-mode-map
