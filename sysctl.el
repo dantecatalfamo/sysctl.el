@@ -78,18 +78,24 @@
   (if (boundp flyspell-mode)
       (flyspell-mode-off)))
 
+(defun sysctl-construct-path ()
+  "Construct path from the current load node on the sysctl tree."
+    (save-excursion
+      (let (path)
+        (if (org-at-heading-p)
+             nil
+          (outline-previous-heading)
+          (push (substring-no-properties (org-get-heading t t t t)) path)
+          (while (org-up-heading-safe)
+            (push (substring-no-properties (org-get-heading t t t t)) path))
+          (concat (string-join path "."))))))
+
 (defun sysctl-construct-command ()
   "Construct a sysctl command from the current position in the tree."
   (save-excursion
-    (let ((value (string-trim (thing-at-point 'line t)))
-          path)
-      (if (org-at-heading-p)
-          (message "The point must be on a value.")
-        (outline-previous-heading)
-        (push (substring-no-properties (org-get-heading t t t t)) path)
-        (while (org-up-heading-safe)
-          (push (substring-no-properties (org-get-heading t t t t)) path))
-        (concat (string-join path ".") "=" value)))))
+    (when-let ((path (sysctl-construct-path))
+               (value (string-trim (thing-at-point 'line t))))
+      (concat path "=" value))))
 
 (defun sysctl-superuser-cmd ()
   "Return the system's super user command."
@@ -107,11 +113,22 @@
 (defun sysctl-set-value ()
   "Set the value of the current leaf on the tree in sysctl."
   (interactive)
-  (if-let* ((sysctl-cmd (sysctl-construct-command)))
+  (if-let ((sysctl-cmd (sysctl-construct-command)))
       (if (y-or-n-p (concat "Set " sysctl-cmd "?"))
           (let ((default-directory (sysctl-construct-tramp)))
             (message (string-trim (sysctl-run sysctl-cmd))))
-        (message "Not set."))))
+        (message "Not set."))
+    (message "The point must be on a value.")))
+
+(defun sysctl-refresh-value ()
+  "Get the current value for a certain leaf node in the sysctl tree."
+  (interactive)
+  (if-let* ((path (sysctl-construct-path))
+            (line (sysctl-run path))
+            (value (cdr (sysctl-split-line line (sysctl-separator)))))
+      (progn (delete-region (line-beginning-position) (line-end-position))
+             (insert value))
+    (message "The point must be on a value.")))
 
 (defvar sysctl-mode-map
       (let ((map (make-sparse-keymap)))
