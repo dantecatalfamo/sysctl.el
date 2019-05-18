@@ -148,7 +148,8 @@
   "Construct an Org buffer from the sysctl tree."
   (interactive)
   (switch-to-buffer sysctl-buffer-name)
-  (erase-buffer)
+  (let ((inhibit-read-only t))
+    (erase-buffer))
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
   (sysctl-mode)
   (if (boundp flyspell-mode)
