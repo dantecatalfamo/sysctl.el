@@ -1,7 +1,7 @@
-;;; sysctl.el -- Manage sysctl through emacs  -*- lexical-binding: t -*-
+;;; sysctl.el --- Manage sysctl through emacs  -*- lexical-binding: t -*-
 
 ;; Author: Dante Catalfamo
-;; Version: 0.2.2
+;; Version: 0.2.3
 ;; Package-Requires: ((emacs "24"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, management
