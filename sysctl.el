@@ -1,10 +1,10 @@
 ;;; sysctl.el -- Manage sysctl through emacs  -*- lexical-binding: t -*-
 
 ;; Author: Dante Catalfamo
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Package-Requires: ((emacs "24"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
-;; Keywords: sysctl
+;; Keywords: sysctl, management
 
 ;; This file is not part of GNU Emacs.
 
@@ -20,14 +20,10 @@
 (defvar sysctl-buffer-name "*sysctl*"
   "Default name of the sysctl buffer.")
 
-(defun sysctl--run-command (args)
-  "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
-  (let ((shell-file-name "/bin/sh"))
-    (shell-command-to-string args)))
-
 (defun sysctl-run (args)
-  "Run `sysctl' with the ARGS arguments, run with root if AS-ROOT is non-nil."
-  (sysctl--run-command (concat "sysctl " args)))
+  "Run `sysctl' with the ARGS arguments."
+  (let ((shell-file-name "/bin/sh")) ;  shell-file-name is a TRAMP work around
+    (shell-command-to-string (concat "sysctl " args))))
 
 (defun sysctl-separator ()
   "System dependant syscl separator."
@@ -147,8 +143,8 @@
 
 (defvar sysctl-mode-map
       (let ((map (make-sparse-keymap)))
-        (define-key map (kbd "C-c C-c") 'sysctl-set-value)
-        (define-key map (kbd "C-c C-k") 'sysctl-refresh-value)
+        (define-key map (kbd "C-c C-c") #'sysctl-set-value)
+        (define-key map (kbd "C-c C-k") #'sysctl-refresh-value)
         map))
 
 (define-derived-mode sysctl-mode org-mode "Sysctl"
