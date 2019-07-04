@@ -1,6 +1,17 @@
 ;;; sysctl.el -- Manage sysctl through emacs  -*- lexical-binding: t -*-
+
+;; Author: Dante Catalfamo
+;; Version: 0.2.1
+;; Package-Requires: ((emacs "24"))
+;; URL: https://github.com/dantecatalfamo/sysctl.el
+;; Keywords: sysctl
+
+;; This file is not part of GNU Emacs.
+
 ;;; Commentary:
-;; This package allows you to view sysctl in a hierarchal structure in Emacs.
+
+;; This package allows you to view and edit sysctl in a hierarchal structure in Emacs.
+
 ;;; Code:
 
 (require 'subr-x)
