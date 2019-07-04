@@ -10,7 +10,7 @@
 
 ;;; Commentary:
 
-;; This package allows you to view and edit sysctl in a hierarchal structure in Emacs.
+;; View and edit sysctl in a hierarchal structure.
 
 ;;; Code:
 
