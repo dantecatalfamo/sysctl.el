@@ -1,7 +1,7 @@
 ;;; sysctl.el --- Manage sysctl  -*- lexical-binding: t -*-
 
 ;; Author: Dante Catalfamo
-;; Version: 0.2.3
+;; Version: 0.2.4
 ;; Package-Requires: ((emacs "25"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, tools, unix
@@ -11,6 +11,8 @@
 ;;; Commentary:
 
 ;; View and edit sysctl in a hierarchal structure.
+;; Works on Linux, FreeBSD, OpenBSD, and MacOS.
+;; Will work over TRAMP via SSH as well, including multiple hops.
 
 ;;; Code:
 
@@ -20,10 +22,14 @@
 (defvar sysctl-buffer-name "*sysctl*"
   "Default name of the sysctl buffer.")
 
+(defun sysctl--run-command (args)
+  "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
+  (let ((shell-file-name "/bin/sh"))
+    (shell-command-to-string args)))
+
 (defun sysctl-run (args)
-  "Run `sysctl' with the ARGS arguments."
-  (let ((shell-file-name "/bin/sh")) ;  shell-file-name is a TRAMP work around
-    (shell-command-to-string (concat "sysctl " args))))
+  "Run `sysctl' with the ARGS arguments, run with root if AS-ROOT is non-nil."
+  (sysctl--run-command (concat "sysctl " args)))
 
 (defun sysctl-separator ()
   "System dependant syscl separator."
