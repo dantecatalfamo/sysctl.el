@@ -1,5 +1,8 @@
 # sysctl.el
-Manage sysctl through Emacs
+View and edit sysctl in a hierarchal structure in Emacs.
+Works on Linux, FreeBSD, OpenBSD, and MacOS.
+Will work over TRAMP via SSH as well, including multiple hops.
+
 
 ## Commands
 `sysctl` Generate the sysctl tree in a new buffer
