@@ -1,5 +1,7 @@
 ;;; sysctl.el --- Manage sysctl  -*- lexical-binding: t -*-
 
+;; Copyright (C) Dante Catalfamo
+
 ;; Author: Dante Catalfamo
 ;; Version: 0.2.4
 ;; Package-Requires: ((emacs "25"))
