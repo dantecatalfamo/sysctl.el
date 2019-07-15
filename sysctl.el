@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 Dante Catalfamo
 
 ;; Author: Dante Catalfamo
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Package-Requires: ((emacs "26"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, tools, unix
@@ -45,11 +45,10 @@
 
 (defun sysctl-separator ()
   "System-dependant sysctl separator."
-  (let ((system (sysctl--run-command "uname -s")))
-    (pcase system
-      ("OpenBSD\n" "=")
-      ("Linux\n" " = ")
-      (_ ": "))))  ; Darwin and FreeBSD both use ": "
+  (pcase (sysctl--run-command "uname -s")
+    ("OpenBSD\n" "=")
+    ("Linux\n" " = ")
+    (_ ": ")))  ; Darwin and FreeBSD both use ": "
 
 (defun sysctl-split-line (line separator)
   "Split LINE into key and value, splitting with SEPARATOR."
@@ -116,10 +115,9 @@
 
 (defun sysctl-superuser-cmd ()
   "Return the system's super user command."
-  (let ((system (sysctl--run-command "uname -s")))
-    (cond
-     ((string= system "OpenBSD\n") "doas")
-     (t "sudo"))))
+  (pcase (sysctl--run-command "uname -s")
+    ("OpenBSD\n" "doas")
+    (_ "sudo")))
 
 (defun sysctl-construct-tramp ()
   "Construct the TRAMP path required to run a command as root."
