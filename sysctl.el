@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 Dante Catalfamo
 
 ;; Author: Dante Catalfamo
-;; Version: 0.3.1
+;; Version: 0.3.2
 ;; Package-Requires: ((emacs "26"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, tools, unix
@@ -31,8 +31,8 @@
 (require 'subr-x)
 (require 'org)
 
-(defvar sysctl-buffer-name "*sysctl*"
-  "Default name of the sysctl buffer.")
+(defvar sysctl-buffer-prefix "sysctl"
+  "Default prefix of sysctl buffers.")
 
 (defun sysctl--run-command (args)
   "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
@@ -154,6 +154,12 @@
     (when (called-interactively-p 'interactive)
       (message "The point must be on a value."))))
 
+(defun sysctl-buffer-name ()
+  "Format sysctl buffer name for current host."
+    (if-let ((host (file-remote-p default-directory 'host)))
+        (format "*%s %s*" sysctl-buffer-prefix host)
+      (format "*%s %s*" sysctl-buffer-prefix (system-name))))
+
 (defvar sysctl-mode-map
       (let ((map (make-sparse-keymap)))
         (define-key map (kbd "C-c C-c") #'sysctl-set-value)
@@ -167,9 +173,9 @@
 (defun sysctl ()
   "Construct an Org buffer from the sysctl tree."
   (interactive)
-  (if (get-buffer sysctl-buffer-name)
-      (kill-buffer sysctl-buffer-name))
-  (switch-to-buffer sysctl-buffer-name)
+  (switch-to-buffer (sysctl-buffer-name))
+  (let ((inhibit-read-only t))
+    (erase-buffer))
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
   (sysctl-mode)
   (when flyspell-mode
