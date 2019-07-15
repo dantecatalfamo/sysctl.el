@@ -167,7 +167,8 @@
 (defun sysctl ()
   "Construct an Org buffer from the sysctl tree."
   (interactive)
-  (kill-buffer sysctl-buffer-name)
+  (if (get-buffer sysctl-buffer-name)
+      (kill-buffer sysctl-buffer-name))
   (switch-to-buffer sysctl-buffer-name)
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
   (sysctl-mode)
