@@ -1,10 +1,10 @@
-;;; sysctl.el --- Manage sysctl  -*- lexical-binding: t -*-
+;;; sysctl.el --- Manage sysctl though org-mode  -*- lexical-binding: t -*-
 
-;; Copyright (C) Dante Catalfamo
+;; Copyright (C) 2019 Dante Catalfamo
 
 ;; Author: Dante Catalfamo
-;; Version: 0.2.4
-;; Package-Requires: ((emacs "25"))
+;; Version: 0.3.0
+;; Package-Requires: ((emacs "26"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, tools, unix
 
@@ -12,9 +12,19 @@
 
 ;;; Commentary:
 
-;; View and edit sysctl in a hierarchal structure.
-;; Works on Linux, FreeBSD, OpenBSD, and MacOS.
+;; View and edit sysctl in a hierarchical structure.
+;; Works on Linux, FreeBSD, OpenBSD, and macOS.
 ;; Will work over TRAMP via SSH as well, including multiple hops.
+
+;;; Commands
+
+;; `sysctl' Generate the sysctl buffer
+
+;;; Keybindings
+
+;; C-c C-c Set the value of current position in the sysctl tree
+;; C-c C-k Refresh the value of current position in the sysctl tree
+
 
 ;;; Code:
 
@@ -26,7 +36,7 @@
 
 (defun sysctl--run-command (args)
   "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
-  (let ((shell-file-name "/bin/sh"))
+  (let ((explicit-shell-file-name "/bin/sh"))
     (shell-command-to-string args)))
 
 (defun sysctl-run (args)
@@ -34,13 +44,12 @@
   (sysctl--run-command (concat "sysctl " args)))
 
 (defun sysctl-separator ()
-  "System dependant syscl separator."
+  "System-dependant sysctl separator."
   (let ((system (sysctl--run-command "uname -s")))
-    (cond ((string= system "Darwin\n") ": ")
-          ((string= system "OpenBSD\n") "=")
-          ((string= system "FreeBSD\n") ": ")
-          ((string= system "Linux\n") " = ")
-          (t ": "))))
+    (pcase system
+      ("OpenBSD\n" "=")
+      ("Linux\n" " = ")
+      (_ ": "))))  ; Darwin and FreeBSD both use ": "
 
 (defun sysctl-split-line (line separator)
   "Split LINE into key and value, splitting with SEPARATOR."
@@ -91,8 +100,7 @@
   "Construct path from the current load node on the sysctl tree."
     (save-excursion
       (let (path)
-        (if (org-at-heading-p)
-             nil
+        (unless (org-at-heading-p)
           (outline-previous-heading)
           (push (substring-no-properties (org-get-heading t t t t)) path)
           (while (org-up-heading-safe)
@@ -115,17 +123,16 @@
 
 (defun sysctl-construct-tramp ()
   "Construct the TRAMP path required to run a command as root."
-  (let ((dir default-directory)
-        ssh-host)
-    (if (not (string-prefix-p "/ssh" dir))
-        (concat "/" (sysctl-superuser-cmd) "::")
-      (if (string= (sysctl--run-command "whoami") "root\n")
-          dir
-        (save-match-data
-          (when (string-match ".*:\\(.+\\):" dir)
-            (setq ssh-host (match-string 1 dir))
-            (string-match "\\(.*\\):[^:]+$" dir)
-            (concat (match-string 1 dir) "|" (sysctl-superuser-cmd) ":" ssh-host ":")))))))
+  (if (string= (sysctl--run-command "whoami") "root\n")
+      default-directory
+    (if (string-prefix-p "/ssh" default-directory)
+        (let (ssh-host)
+          (save-match-data
+            (when (string-match ".*:\\(.+\\):" default-directory)
+              (setq ssh-host (match-string 1 default-directory))
+              (string-match "\\(.*\\):[^:]+$" default-directory)
+              (concat (match-string 1 default-directory) "|" (sysctl-superuser-cmd) ":" ssh-host ":"))))
+      (concat "/" (sysctl-superuser-cmd) "::"))))
 
 (defun sysctl-set-value ()
   "Set the value of the current leaf on the tree in sysctl."
@@ -167,8 +174,8 @@
     (erase-buffer))
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
   (sysctl-mode)
-  (if (boundp flyspell-mode)
-      (flyspell-mode-off)))
+  (when flyspell-mode
+    (flyspell-mode-off)))
 
 (provide 'sysctl)
 ;;; sysctl.el ends here
