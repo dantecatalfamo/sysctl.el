@@ -167,9 +167,8 @@
 (defun sysctl ()
   "Construct an Org buffer from the sysctl tree."
   (interactive)
+  (kill-buffer sysctl-buffer-name)
   (switch-to-buffer sysctl-buffer-name)
-  (let ((inhibit-read-only t))
-    (erase-buffer))
   (sysctl-construct-tree (sysctl-split-lines (sysctl-run "-a")))
   (sysctl-mode)
   (when flyspell-mode
