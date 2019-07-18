@@ -36,7 +36,7 @@
 
 (defun sysctl--run-command (args)
   "Run shell commands ARGS and return output as a string, only exists as a TRAMP issue work around."
-  (let ((explicit-shell-file-name "/bin/sh"))
+  (let ((shell-file-name "/bin/sh"))
     (shell-command-to-string args)))
 
 (defun sysctl-run (args)
