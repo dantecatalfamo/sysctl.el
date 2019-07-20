@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 Dante Catalfamo
 
 ;; Author: Dante Catalfamo
-;; Version: 0.3.2
+;; Version: 0.3.3
 ;; Package-Requires: ((emacs "26"))
 ;; URL: https://github.com/dantecatalfamo/sysctl.el
 ;; Keywords: sysctl, tools, unix
@@ -13,7 +13,7 @@
 ;;; Commentary:
 
 ;; View and edit sysctl in a hierarchical structure.
-;; Works on Linux, OpenBSD, and macOS.
+;; Works on Linux, FreeBSD, OpenBSD, and macOS.
 ;; Will work over TRAMP via SSH as well, including multiple hops.
 
 ;;; Commands
@@ -27,7 +27,7 @@
 
 ;;; Bugs
 
-;; FreeBSD's multiline values currently break parsing
+;; Only the first line of a multiline value gets shown
 
 
 ;;; Code:
@@ -57,7 +57,7 @@
 (defun sysctl-split-line (line separator)
   "Split LINE into key and value, splitting with SEPARATOR."
   (let (key value)
-    (when (string-match (concat "\\(.*?\\)" separator "\\(.*\\)$") line)
+    (when (string-match (concat "\\(^\\w+\\..*?\\)" separator "\\(.*\\)$") line)
         (save-match-data
           (setq key (split-string (match-string 1 line) "\\.")))
       (setq value (match-string 2 line))
