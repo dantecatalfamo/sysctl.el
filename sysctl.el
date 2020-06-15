@@ -100,7 +100,7 @@
         (insert (concat line-value "\n"))))))
 
 (defun sysctl-construct-path ()
-  "Construct path from the current load node on the sysctl tree."
+  "Construct path from the current leaf node on the sysctl tree."
     (save-excursion
       (let (path)
         (unless (org-at-heading-p)
